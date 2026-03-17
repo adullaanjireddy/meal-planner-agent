@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from agent import MealPlannerAgent
+from backend.agent import MealPlannerAgent
 from memory.user_profile import (
     load_profile,
     save_profile,
