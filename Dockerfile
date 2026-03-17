@@ -19,5 +19,7 @@ COPY . .
 RUN mkdir -p /app/memory/profiles
 
 # Expose ports
-EXPOSE 5000 8501
-CMD ["python","backend/server.py"]
+# Expose only Streamlit port
+EXPOSE 8501
+
+CMD sh -c "python backend/server.py & streamlit run app.py --server.port=8501 --server.address=0.0.0.0"
