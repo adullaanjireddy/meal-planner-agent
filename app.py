@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-FLASK_URL = os.getenv("FLASK_URL", "http://localhost:5000")
+FLASK_URL = os.getenv("FLASK_URL", "http://127.0.0.1:5000")
 
 st.set_page_config(
     page_title="🍽️ AI Meal Planner",

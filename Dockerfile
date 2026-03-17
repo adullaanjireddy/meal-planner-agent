@@ -16,4 +16,4 @@ RUN mkdir -p /app/memory/profiles
 # ❗ REMOVE 8501
 EXPOSE 10000
 
-CMD ["sh", "-c", "python server.py & streamlit run app.py --server.port=${PORT:-10000} --server.address=0.0.0.0"]
+CMD ["sh", "-c", "python server.py & sleep 8 && streamlit run app.py --server.port=${PORT:-10000} --server.address=0.0.0.0"]
