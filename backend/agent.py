@@ -32,34 +32,40 @@ Always be encouraging, practical, and budget-conscious."""
         dietary_str = ", ".join(dietary) if dietary else "None"
         pantry_str = ", ".join(pantry) if pantry else "Not specified"
 
-        prompt = f"""Create a detailed 7-day Indian meal plan with the following constraints:
+        prompt = f"""Create a detailed 7-day Indian meal plan with STRICT constraints:
 
-Pantry Items Available: {pantry_str}
-Weekly Budget: Rs.{budget}
-Dietary Restrictions: {dietary_str}
+           Pantry Items Available: {pantry_str}
+           Weekly Budget: Rs.{budget}
+         Dietary Restrictions: {dietary_str}
 
-Please generate a full 7-day Indian meal plan (Breakfast, Lunch, Dinner, Snack) that:
-1. Maximizes use of pantry items already available
-2. Stays within the weekly budget
-3. Respects all dietary restrictions
-4. Includes popular Indian dishes like Dal, Rice, Roti, Sabzi, Biryani, Idli, Dosa etc
-5. Varies enough to stay interesting
+         CRITICAL RULE (VERY IMPORTANT):
+         - You MUST ONLY use these pantry items as the main ingredients: {pantry_str}
+         - Do NOT generate meals like Idli, Dosa, Fruit Salad, or any dish that does NOT use these pantry items
+         - Every meal MUST directly include at least one pantry item
+         - You are allowed to add only basic supporting ingredients (rice, roti, spices, onion, tomato)
+         - Do NOT introduce unrelated ingredients like fruits or completely different dishes
 
-IMPORTANT RULES:
-- Never use tilde symbol ~ anywhere
-- Never use strikethrough text
-- Always write price like this: (Rs.10, 20 mins)
-- Never write price like this: (~Rs.10) or (~~Rs.10)
+         Meal Planning Rules:
+           1. Every meal must include at least one pantry item
+           2. Stay within the weekly budget
+          3. Respect dietary restrictions
+           4. Keep meals simple, practical, and Indian-style
+          5. Avoid repeating the same dish too often
 
-Format each day exactly like this:
-Day 1 - Monday
-Breakfast: [Meal name] (Rs.X, XX mins)
-Lunch: [Meal name] (Rs.X, XX mins)
-Dinner: [Meal name] (Rs.X, XX mins)
-Snack: [Snack name] (Rs.X)
-Note: [Why these meals and what pantry items they use]
+         IMPORTANT RULES:
+         - Never use tilde symbol ~ anywhere
+         - Never use strikethrough text
+         - Always write price like this: (Rs.10, 20 mins)
 
-End with Weekly Cost Summary in Rs. and Top Tips for this week."""
+         Format each day exactly like this:
+         Day 1 - Monday
+         Breakfast: [Meal name] (Rs.X, XX mins)
+         Lunch: [Meal name] (Rs.X, XX mins)
+          Dinner: [Meal name] (Rs.X, XX mins)
+          Snack: [Snack name] (Rs.X)
+          Note: Mention which pantry item is used in each meal
+
+         End with Weekly Cost Summary in Rs. and Top Tips for this week."""
 
         messages = history + [{"role": "user", "content": prompt}]
         return self.chat(messages)
