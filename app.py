@@ -1,11 +1,7 @@
 import streamlit as st
-import requests
-import os
-from dotenv import load_dotenv
+from backend.agent import MealPlannerAgent
 
-load_dotenv()
-
-FLASK_URL = os.getenv("FLASK_URL", "http://127.0.0.1:5000")
+agent = MealPlannerAgent()
 
 st.set_page_config(
     page_title="🍽️ AI Meal Planner",
@@ -28,25 +24,10 @@ for key, default in {
         st.session_state[key] = default
 
 
-# ---------------- API CALL ----------------
-def call_flask(endpoint, payload):
-    try:
-        res = requests.post(f"{FLASK_URL}/{endpoint}", json=payload, timeout=60)
-        return res.json()
-    except:
-        return {"success": False, "error": "Flask backend not running"}
-
-
 # ---------------- HEADER ----------------
 st.title("🍽️ AI Meal Planner")
 st.caption("Smart meal planning · Budget-aware · Pantry-first")
 
-# ---------------- BACKEND CHECK ----------------
-try:
-    requests.get(f"{FLASK_URL}/health")
-except:
-    st.error("⚠️ Flask not running. Run backend/app.py first")
-    st.stop()
 
 # ---------------- SIDEBAR ----------------
 with st.sidebar:
@@ -67,6 +48,7 @@ with st.sidebar:
 
     generate = st.button("🚀 Generate Plan")
 
+
 # ---------------- GENERATE PLAN ----------------
 if generate:
     pantry_list = [i.strip().lower() for i in pantry_input.split("\n") if i.strip()]
@@ -79,33 +61,30 @@ if generate:
         st.session_state["dietary"] = dietary
 
         with st.spinner("Generating meal plan..."):
-            res = call_flask("generate-plan", {
-                "pantry": pantry_list,
-                "budget": budget,
-                "dietary": dietary
-            })
+            plan = agent.generate_meal_plan(pantry_list, budget, dietary)
 
-        if res.get("success"):
-            st.session_state["plan"] = res["plan"]
+            # ✅ NEW: cost + nutrition
+            cost = agent.calculate_cost(pantry_list)
+            calories, protein = agent.calculate_nutrition(pantry_list)
 
-            # ✅ NEW: store cost + nutrition
-            st.session_state["cost"] = res.get("cost", 0)
-            st.session_state["calories"] = res.get("calories", 0)
-            st.session_state["protein"] = res.get("protein", 0)
+        st.session_state["plan"] = plan
+        st.session_state["cost"] = cost
+        st.session_state["calories"] = calories
+        st.session_state["protein"] = protein
 
-            st.success("Meal Plan Generated")
-        else:
-            st.error(res.get("error"))
+        st.success("Meal Plan Generated")
+
 
 # ---------------- TABS ----------------
 tab1, tab2, tab3 = st.tabs(["📅 Meal Plan", "🛒 Shopping", "💬 Chat"])
+
 
 # ---------------- MEAL PLAN ----------------
 with tab1:
     if st.session_state["plan"]:
         st.write(st.session_state["plan"])
 
-        # ✅ SHOW COST + NUTRITION
+        # ✅ COST + NUTRITION
         st.subheader("📊 Nutrition & Cost")
 
         col1, col2, col3 = st.columns(3)
@@ -119,6 +98,7 @@ with tab1:
         with col3:
             st.metric("💪 Protein (g)", st.session_state["protein"])
 
+        # 🔄 Swap
         st.subheader("🔄 Swap Meal")
 
         day = st.selectbox("Day", ["Monday","Tuesday","Wednesday"])
@@ -126,53 +106,42 @@ with tab1:
         reason = st.text_input("Reason")
 
         if st.button("Swap"):
-            res = call_flask("swap-meal", {
-                "day": day,
-                "meal_type": meal_type,
-                "reason": reason,
-                "pantry": st.session_state["pantry"],
-                "dietary": st.session_state["dietary"]
-            })
+            suggestions = agent.swap_meal(
+                day, meal_type, reason,
+                st.session_state["pantry"],
+                st.session_state["dietary"]
+            )
+            st.write(suggestions)
 
-            if res.get("success"):
-                st.write(res["suggestions"])
-            else:
-                st.error(res.get("error"))
     else:
         st.info("Generate plan first")
+
 
 # ---------------- SHOPPING ----------------
 with tab2:
     if st.session_state["plan"]:
 
         if st.button("Generate Shopping List"):
-            res = call_flask("shopping-list", {
-                "plan": st.session_state["plan"],
-                "pantry": st.session_state["pantry"],
-                "budget": st.session_state["budget"]
-            })
-
-            if res.get("success"):
-                st.session_state["shopping_list"] = res["shopping_list"]
-            else:
-                st.error(res.get("error"))
+            shopping = agent.generate_shopping_list(
+                st.session_state["plan"],
+                st.session_state["pantry"],
+                st.session_state["budget"]
+            )
+            st.session_state["shopping_list"] = shopping
 
         if st.session_state["shopping_list"]:
             st.write(st.session_state["shopping_list"])
     else:
         st.info("Generate plan first")
 
+
 # ---------------- CHAT ----------------
 with tab3:
     question = st.text_input("Ask something")
 
     if st.button("Ask"):
-        res = call_flask("ask", {
-            "question": question,
-            "plan_context": st.session_state["plan"] or ""
-        })
-
-        if res.get("success"):
-            st.write(res["answer"])
-        else:
-            st.error(res.get("error"))
+        answer = agent.answer_question(
+            question,
+            st.session_state["plan"] or ""
+        )
+        st.write(answer)
