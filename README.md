@@ -20,30 +20,46 @@ The system can also swap meals, generate shopping lists, and store user preferen
 ## 🏗️ Project Structure
 
 ```
-meal-planner-agent
+meal-planner-agent/
 │
-├── backend
-│   ├── server.py        # Backend API server
-│   └── agent.py         # Core meal planning agent
+├── backend/
+│   ├── __init__.py
+│   ├──  nutrition.py             
+│   ├── agent.py               # Core AI logic
+│   ├── price.py 
+│                
+│   
+│  
 │
-├── memory
-│   ├── user_profile.py  # Stores user preferences
-│   └── profiles/        # Saved user data
 │
-├── utils
-│   └── helpers.py       # Utility/helper functions
+├── memory/
+│   ├── __init__.py
+│   ├── user_profile.py
+│   ├── profiles/
+│   │   └── default.json
 │
-├── app.py               # Frontend interface
-├── requirements.txt     # Python dependencies
-├── .gitignore           # Files ignored by Git
-```
-
+│
+├── utils/
+│   ├── __init__.py
+│   ├── helpers.py
+│
+│
+├── app.py                     # Streamlit frontend
+│
+├── requirements.txt
+├── README.md
+├── .gitignore
+├── .dockerignore
+├── docker-compose.yml
+├── Dockerfile
+├── server.py
+├── .env                       
+└── venv                 
 ---
 
 ## 🛠️ Technologies Used
 
 * **Python**
-* **Flask / FastAPI** (Backend API)
 * **Streamlit** (Frontend interface)
 * **AI Agent logic**
 * **Docker** (for containerization)
@@ -75,4 +91,4 @@ meal-planner-agent
 **Adulla Ramanjaneya Reddy**
 
 AI / Data Science Enthusiast
-Interested in learning and building intelligent AI agents and real-world applications.
+Interested in learning and building machine learning and intelligent AI agents and real-world applications.
