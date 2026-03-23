@@ -2,7 +2,7 @@ import os
 from groq import Groq
 from dotenv import load_dotenv
 
-# ✅ Correct imports
+# Correct imports
 from backend.price import PRICES
 from backend.nutrition import NUTRITION
 
